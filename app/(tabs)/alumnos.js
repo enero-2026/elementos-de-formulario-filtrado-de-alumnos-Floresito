@@ -8,7 +8,9 @@ export default function Alumnos(){
   
   const [alumnos, setAlumnos] = useState([]);
   
+  const [buscaAlumno, setBuscaAlumno] = useState('');
   
+  const alumnosFiltrados = alumnos.filter(alumno => alumno.nombre.toLowerCase().includes(buscaAlumno.toLowerCase()) || alumno.matricula.includes(buscaAlumno));
   
   useEffect(()=> {
     setTimeout(()=>{
@@ -316,8 +318,12 @@ return(
   
   // <TextInput placeholder="hola..."></TextInput> de React native y <TextInput> de Paper no se pueden usar juntos
   <>
-  
-  
+  <TextInput
+    placeholder="Busca por nombre o matricula"
+    value={buscaAlumno}
+    onChangeText={setBuscaAlumno}
+    left={<TextInput.Icon icon="magnify" />}
+  />
   
   <FlatList
   data={alumnosFiltrados}
