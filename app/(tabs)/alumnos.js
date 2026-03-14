@@ -1,6 +1,6 @@
-import { FlatList } from "react-native";
+import { FlatList, View } from "react-native";
 import { useEffect, useState } from "react";
-import {List, TouchableRipple, TextInput, Text} from 'react-native-paper';
+import {List, TextInput, Text, Menu} from 'react-native-paper';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 
@@ -9,8 +9,19 @@ export default function Alumnos(){
   const [alumnos, setAlumnos] = useState([]);
   
   const [buscaAlumno, setBuscaAlumno] = useState('');
+  const [campoOrden, setCampoOrden] = useState('nombre');
+  const [direccionOrden, setDireccionOrden] = useState('asc');
+  const [menuCampoVisible, setMenuCampoVisible] = useState(false);
+  const [menuDireccionVisible, setMenuDireccionVisible] = useState(false);
   
   const alumnosFiltrados = alumnos.filter(alumno => alumno.nombre.toLowerCase().includes(buscaAlumno.toLowerCase()) || alumno.matricula.includes(buscaAlumno));
+  const alumnosFiltradosOrdenados = [...alumnosFiltrados].sort((a, b) => {
+    const comparacion = campoOrden === 'nombre'
+      ? a.nombre.localeCompare(b.nombre)
+      : Number(a.matricula) - Number(b.matricula);
+
+    return direccionOrden === 'asc' ? comparacion : -comparacion;
+  });
   
   useEffect(()=> {
     setTimeout(()=>{
@@ -318,15 +329,56 @@ return(
   
   // <TextInput placeholder="hola..."></TextInput> de React native y <TextInput> de Paper no se pueden usar juntos
   <>
-  <TextInput
-    placeholder="Busca por nombre o matricula"
-    value={buscaAlumno}
-    onChangeText={setBuscaAlumno}
-    left={<TextInput.Icon icon="magnify" />}
-  />
+  <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
+    <View style={{ flex: 4.5, marginRight: 8 }}>
+      <TextInput
+        placeholder="Busca por nombre o matricula"
+        value={buscaAlumno}
+        onChangeText={setBuscaAlumno}
+        left={<TextInput.Icon icon="magnify" />}
+        dense
+      />
+    </View>
+    <View style={{ flex: 1, marginRight: 8 }}>
+      <Menu
+        visible={menuCampoVisible}
+        onDismiss={() => setMenuCampoVisible(false)}
+        anchor={(
+          <TextInput
+            value={campoOrden === 'nombre' ? 'Nombre' : 'Matricula'}
+            editable={false}
+            dense
+            right={<TextInput.Icon icon="menu-down" onPress={() => setMenuCampoVisible(true)} />}
+            onTouchStart={() => setMenuCampoVisible(true)}
+          />
+        )}
+      >
+        <Menu.Item onPress={() => { setCampoOrden('nombre'); setMenuCampoVisible(false); }} title="Nombre" />
+        <Menu.Item onPress={() => { setCampoOrden('matricula'); setMenuCampoVisible(false); }} title="Matricula" />
+      </Menu>
+    </View>
+    <View style={{ flex: 1 }}>
+      <Menu
+        visible={menuDireccionVisible}
+        onDismiss={() => setMenuDireccionVisible(false)}
+        anchor={(
+          <TextInput
+            value={direccionOrden === 'asc' ? 'Ascendente' : 'Descendente'}
+            editable={false}
+            dense
+            right={<TextInput.Icon icon="menu-down" onPress={() => setMenuDireccionVisible(true)} />}
+            onTouchStart={() => setMenuDireccionVisible(true)}
+          />
+        )}
+      >
+        <Menu.Item onPress={() => { setDireccionOrden('asc'); setMenuDireccionVisible(false); }} title="Ascendente" />
+        <Menu.Item onPress={() => { setDireccionOrden('desc'); setMenuDireccionVisible(false); }} title="Descendente" />
+      </Menu>
+    </View>
+  </View>
   
   <FlatList
-  data={alumnosFiltrados}
+  data={alumnosFiltradosOrdenados}
   keyExtractor={(item) => item.matricula}
   renderItem={({ item }) => (
     <>
